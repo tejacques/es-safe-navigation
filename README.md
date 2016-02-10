@@ -35,9 +35,44 @@ let prop = foo && foo.some && foo.some.nested && foo.some.nested.property || nul
 
 let prop2 = foo && foo.some && typeof foo.some.fun === 'function' && foo.some.fun() || null;
 
-let prop2 = foo && foo.some && typeof foo.some.fun === 'function' && foo.some.fun() || null;
+let _nv3
+let prop3 = (_nv3=foo)
+  && (_nv3=_nv3.some)
+  && (_nv3=_nv3.fun)
+  && typeof _nv3 === 'function'
+  && (_nv3=_nv3())
+  && _nv3.prop || null;
 
 let prop4 = foo && foo['some'] && foo['some']['nested'] && foo['some']['nested']['property'] || null;
+
+let _nv5
+let prop5 = (_nv5=foo)
+  && (_nv5=_nv5['some'])
+  && (_nv5=_nv5['fun'])
+  && typeof _nv5 === 'function'
+  && (_nv5=nv5())
+  && _nv5['prop']  || null;
 ```
 
 This works the same way with bracket property accessors:
+
+
+#### Assignment
+
+The save navigation operator *could* also be used for assignment, but would only work for plain object literals
+
+```.js
+let myVar = {};
+
+myVar?.some?.property = 5;
+// myVar is { some: { property: 5 } }
+```
+
+Would desugar to:
+
+```.js
+let myVar = {};
+
+let _nv;
+(_nv=myVar=myVar||{}) && (_nv=_nv.some=_nv.some||{}) && (_nv.property=5);
+```
