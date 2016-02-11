@@ -52,9 +52,23 @@ if (foo != null && foo.bar != null) {
 }
 ```
 
-Note the use of `foo != null` rather than `foo !== null && foo !== undefined`
+Note the use of `foo != null` rather than `foo !== null && foo !== undefined`.
 
-Using the new safe navigation operator, the access now looks like this:
+Actually, this still isn't correct, as each of those properties may be an accessor method or even a function call, so they each need to be memoized:
+
+```.js
+let prop = null;
+
+let _nv;
+if ((_nv = foo) != null
+  && (_nv = _nv.bar) != null) {
+  prop = _nv.baz;
+}
+```
+
+Now it's doing the right thing -- isn't that simple and easy to do? No. No it isn't, and this is precisely why the safe navigation operator is useful.
+
+Using the safe navigation operator, the access now looks like this:
 
 ```.js
 let prop = foo?.bar?.baz; // { qux: "rar" }
@@ -63,7 +77,8 @@ let prop = foo?.bar?.baz; // { qux: "rar" }
 Which desugars to:
 
 ```.js
-let prop = foo != null && foo.bar != null ? foo.bar.baz : null;
+let _nv;
+let prop = (_nv = foo) != null && (_nv = _nv.bar) != null ? _nv.baz : null;
 ```
 
 ### More Examples:
@@ -90,18 +105,20 @@ let prop5 = foo?['bar']?['fun2']()?['baz'];
 Which desugar to the following, respectively:
 
 ```.js
-let prop = foo != null
-  && foo.bar != null
-  && foo.bar.baz != null
-  ? foo.bar.baz.qux
+let _nv;
+let prop = (_nv = foo) != null
+  && (_nv=_nv.bar) != null
+  && (_nv=_nv.baz) != null
+  ? _nv.qux
   : null;
 
-let prop2 = foo != null
-  && foo.bar != null
-  ? foo.bar.fun()
+let _nv2;
+let prop2 = (_nv2=foo) != null
+  && (_nv2=_nv2.bar) != null
+  ? _nv2.fun()
   : null;
 
-let _nv3
+let _nv3;
 let prop3 = (_nv3=foo) != null
   && (_nv3=_nv3.bar) != null
   && (_nv3=_nv3.fun) != null
@@ -109,13 +126,14 @@ let prop3 = (_nv3=foo) != null
   ? _nv3.baz
   : null;
 
-let prop4 = foo != null
-  && foo['bar'] != null
-  && foo['bar']['baz'] != null
-  ? foo['bar']['baz']['qux']
+let _nv4;
+let prop4 = (_nv4=foo) != null
+  && (_nv4=_nv4['bar']) != null
+  && (_nv4=_nv4['baz']) != null
+  ? _nv4['qux']
   : null;
 
-let _nv5
+let _nv5;
 let prop5 = (_nv5=foo) != null
   && (_nv5=_nv5['bar']) != null
   && (_nv5=_nv5['fun2']) != null
@@ -123,8 +141,6 @@ let prop5 = (_nv5=foo) != null
   ? _nv5['baz']
   : null;
 ```
-
-This works the same way with bracket property accessors:
 
 
 #### Assignment
@@ -148,4 +164,4 @@ myVar.some = myVar.some != null ? myVar.some : {};
 myVar.some.property = 5;
 ```
 
-Because the assignment scenario makes an assumption about that shape and type of the object being modified, it may not be a good candidate for inclusion.
+Because the assignment scenario makes an assumption about that shape and type of the object being modified, it may not be a good candidate for inclusion. A good example of why is that typos would create new parts of the object, rather than throwing an exception.
