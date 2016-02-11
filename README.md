@@ -1,10 +1,10 @@
-# ECMAScript Proposal: Save Navigation (Elvis) Operator
+## ECMAScript Proposal: Safe Navigation (Elvis) Operator
 
 This proposal introduces a new accessor modifier `?`, preceeding property access via a `.` or `[]`. An example of which would be: `foo?.bar` or `foo?['bar']`
 
 ### Introduction
 
-The safe navigation operator, also often known as the null propagation operator, or the null-conditional Operator in C#, or the Elvis operator due to it's syntax, allows for the safe access of nested object properties which may be null.
+The safe navigation operator, also known as the null-conditional Operator in C#, or the Elvis operator due to it's syntax, allows for the safe access of nested object properties which may be `null` or `undefined`.
 
 Using the operator in the manner: `foo?.bar` ensures that:
 
@@ -82,6 +82,7 @@ let prop3 = foo?.bar?.fun2().?baz;
 // bracket property access
 let prop4 = foo?['bar']?['baz']?['qux'];
 //> prop4 = "rar"
+
 let prop5 = foo?['bar']?['fun2']()?['baz'];
 //> prop5 = "qux"
 ```
