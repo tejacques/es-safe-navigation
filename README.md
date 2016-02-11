@@ -8,8 +8,12 @@ The safe navigation operator, also often known as the null propagation operator,
 
 Using the operator in the manner: `foo?.bar` ensures that:
 
-* the parent object is truthy
-* if it is no
+* The parent object is able to have properties (I.E. not `null` or `undefined`)
+* That's it!
+
+It's a very straightforward concept that is also very powerful.
+
+### Example
 
 Given the following object:
 
@@ -28,64 +32,85 @@ let foo = {
 
 The operator itself is used as syntactic sugar for null checking as follows:
 
-Currently the idiomatic way of doing this in ECMAScript is as follows:
+Currently the idiomatic way of safely accessing `foo.bar.baz` doing this in ECMAScript is as follows:
 
 ```.js
 let prop = null;
 
-if (foo) {
-  prop = foo.bar
+if (foo && foo.bar) {
+  prop = foo.bar.baz
 }
 ```
 
-Specifically, if foo exists and is truthy, we pull it's property `bar`
-
-Using the new safe navigation operator, it now looks like this:
+Specifically, if `foo` exists and is truthy, we pull it's property `bar`. Though this is fairly idiomatic and widely used, it is incorrect and fails in the case of falsy values such as `0` and `''` which can have properties. Really what should be happening is this:
 
 ```.js
-let prop = foo?.bar;
+let prop = null;
+
+if (foo != null && foo.bar != null) {
+  prop = foo.bar.baz
+}
+```
+
+Note the use of `foo != null` rather than `foo !== null && foo !== undefined`
+
+Using the new safe navigation operator, the access now looks like this:
+
+```.js
+let prop = foo?.bar?.baz;
 ```
 
 Which desugars to:
 
 ```.js
-let prop = foo ? foo.bar : null;
+let prop = foo != null && foo.bar != null ? foo.bar.baz : null;
 ```
 
 ### More Examples:
 
 ```.js
-let prop2 = foo?.bar?.baz?.qux;
-let prop3 = foo?.bar?.fun();
-let prop4 = foo?.bar?.fun2().?baz;
-let prop5 = foo?['bar']?['baz']?['qux'];
-let prop6 = foo?['bar']?['fun']()?['baz'];
+let prop = foo?.bar?.baz?.qux;
+let prop2 = foo?.bar?.fun();
+let prop3 = foo?.bar?.fun2().?baz;
+let prop4 = foo?['bar']?['baz']?['qux'];
+let prop5 = foo?['bar']?['fun']()?['baz'];
 ```
 
-Which desugar to:
+Which desugar to the following, respectively:
 
 ```.js
-let prop = foo && foo.bar && foo.bar.baz && foo.bar.baz.qux || null;
+let prop = foo != null
+  && foo.bar != null
+  && foo.bar.baz != null
+  ? foo.bar.baz.qux
+  : null;
 
-let prop2 = foo && foo.bar && typeof foo.bar.fun === 'function' && foo.bar.fun() || null;
+let prop2 = foo != null
+  && foo.bar != null
+  ? foo.bar.fun()
+  : null;
 
 let _nv3
-let prop3 = (_nv3=foo)
-  && (_nv3=_nv3.bar)
-  && (_nv3=_nv3.fun)
-  && typeof _nv3 === 'function'
-  && (_nv3=_nv3())
-  && _nv3.baz || null;
+let prop3 = (_nv3=foo) != null
+  && (_nv3=_nv3.bar) != null
+  && (_nv3=_nv3.fun) != null
+  && (_nv3=_nv3()) != null
+  ? _nv3.baz
+  : null;
 
-let prop4 = foo && foo['bar'] && foo['bar']['baz'] && foo['bar']['baz']['qux'] || null;
+let prop4 = foo != null
+  && foo['bar'] != null
+  && foo['bar']['baz'] != null
+  ? foo['bar']['baz']['qux']
+  : null;
 
 let _nv5
-let prop5 = (_nv5=foo)
-  && (_nv5=_nv5['bar'])
-  && (_nv5=_nv5['fun'])
-  && typeof _nv5 === 'function'
-  && (_nv5=nv5())
-  && _nv5['baz'] || null;
+let prop5 = (_nv5=foo) != null
+  && (_nv5=_nv5['bar']) != null
+  && (_nv5=_nv5['fun']) != null
+  && (_nv5=nv5()) != null
+  ? _nv5['baz']
+  : null;
 ```
 
 This works the same way with bracket property accessors:
@@ -107,6 +132,9 @@ Would desugar to:
 ```.js
 let myVar = {};
 
-let _nv;
-(_nv=myVar=myVar||{}) && (_nv=_nv.some=_nv.some||{}) && (_nv.property=5);
+myVar = myVar != null ? myVar : {};
+myVar.some = myVar.some != null ? myVar.some : {};
+myVar.some.property = 5;
 ```
+
+Because the assignment scenario makes an assumption about that shape and type of the object being modified, it may not be a good candidate for inclusion.
