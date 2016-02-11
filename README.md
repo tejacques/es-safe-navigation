@@ -21,7 +21,7 @@ Given the following object:
 let foo = {
   bar: {
     baz: {
-      qux: "bar"
+      qux: "rar"
     },
     fun: () => "baz",
     fun2: () => { baz: "qux" }
@@ -57,7 +57,7 @@ Note the use of `foo != null` rather than `foo !== null && foo !== undefined`
 Using the new safe navigation operator, the access now looks like this:
 
 ```.js
-let prop = foo?.bar?.baz;
+let prop = foo?.bar?.baz; // { qux: "rar" }
 ```
 
 Which desugars to:
@@ -69,11 +69,21 @@ let prop = foo != null && foo.bar != null ? foo.bar.baz : null;
 ### More Examples:
 
 ```.js
+// dot property access
 let prop = foo?.bar?.baz?.qux;
+//> prop = "rar"
+
 let prop2 = foo?.bar?.fun();
+//> prop2 = "bar"
+
 let prop3 = foo?.bar?.fun2().?baz;
+//> prop3 = "qux"
+
+// bracket property access
 let prop4 = foo?['bar']?['baz']?['qux'];
-let prop5 = foo?['bar']?['fun']()?['baz'];
+//> prop4 = "rar"
+let prop5 = foo?['bar']?['fun2']()?['baz'];
+//> prop5 = "qux"
 ```
 
 Which desugar to the following, respectively:
@@ -107,7 +117,7 @@ let prop4 = foo != null
 let _nv5
 let prop5 = (_nv5=foo) != null
   && (_nv5=_nv5['bar']) != null
-  && (_nv5=_nv5['fun']) != null
+  && (_nv5=_nv5['fun2']) != null
   && (_nv5=nv5()) != null
   ? _nv5['baz']
   : null;
@@ -124,7 +134,7 @@ The save navigation operator *could* also be used for assignment, but would only
 let myVar = {};
 
 myVar?.some?.property = 5;
-// myVar is { some: { property: 5 } }
+//> myVar = { some: { property: 5 } }
 ```
 
 Would desugar to:
