@@ -166,3 +166,32 @@ myVar.some.property = 5;
 ```
 
 Because the assignment scenario makes an assumption about that shape and type of the object being modified, it isn't a good candidate for inclusion. A good example of why is that typos would create new parts of the object, rather than throwing an exception. It is being mentioned here mainly to show it isn't viable.
+
+### Syntax
+
+The syntax `?.` was chosen for consistency.
+
+The following syntax does not work :
+
+Syntax: `?[`
+
+Example Use:
+`foo?['bar']`
+
+Example issue:
+
+```.js
+conditional?['foo']?['map']:fallback;
+```
+
+This is ambiguous -- does it mean
+
+```.js
+(conditional?['foo']) ? ['map'] : fallback
+```
+
+or
+
+```.js
+conditional ? (['foo']?['map]) : fallback
+```
