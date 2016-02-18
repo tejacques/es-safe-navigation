@@ -193,5 +193,5 @@ This is ambiguous -- does it mean
 or
 
 ```.js
-conditional ? (['foo']?['map]) : fallback
+conditional ? (['foo']?['map']) : fallback
 ```
