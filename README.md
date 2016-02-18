@@ -1,6 +1,6 @@
 ## ECMAScript Proposal: Safe Navigation (Elvis) Operator
 
-This proposal introduces a new accessor modifier `?`, preceeding property access via a `.` or `[]`. An example of which would be: `foo?.bar` or `foo?['bar']`
+This proposal introduces a new accessor modifier `?.`, preceeding property access via a `.` or `[]`. An example of which would be: `foo?.bar`, or `foo?.[bar]`, or `foo?.()`
 
 ### Introduction
 
@@ -54,7 +54,7 @@ if (foo != null && foo.bar != null) {
 
 Note the use of `foo != null` rather than `foo !== null && foo !== undefined`.
 
-Actually, this still isn't correct, as each of those properties may be an accessor method or even a function call, so they each need to be memoized:
+Actually, this still isn't correct, as each of those properties may be an accessor method or even a function call, so they each need to be cached:
 
 ```.js
 let prop = null;
@@ -95,10 +95,10 @@ let prop3 = foo?.bar?.fun2().?baz;
 //> prop3 = "qux"
 
 // bracket property access
-let prop4 = foo?['bar']?['baz']?['qux'];
+let prop4 = foo?.['bar']?.['baz']?.['qux'];
 //> prop4 = "rar"
 
-let prop5 = foo?['bar']?['fun2']()?['baz'];
+let prop5 = foo?.['bar']?.['fun2']?.()?.['baz'];
 //> prop5 = "qux"
 ```
 
@@ -113,16 +113,16 @@ let prop = (_nv = foo) != null
   : null;
 
 let _nv2;
-let prop2 = (_nv2=foo) != null
+let prop2 = ((_nv2=foo) != null
   && (_nv2=_nv2.bar) != null
-  ? _nv2.fun()
-  : null;
+  ? _nv2.fun
+  : null)();
 
 let _nv3;
-let prop3 = (_nv3=foo) != null
+let prop3 = (_nv3 = ((_nv3=foo) != null
   && (_nv3=_nv3.bar) != null
-  && (_nv3=_nv3.fun) != null
-  && (_nv3=_nv3()) != null
+  ? nv3.fun
+  : null)()) != null
   ? _nv3.baz
   : null;
 
@@ -137,13 +137,14 @@ let _nv5;
 let prop5 = (_nv5=foo) != null
   && (_nv5=_nv5['bar']) != null
   && (_nv5=_nv5['fun2']) != null
+  && typeof _nv5 === 'function'
   && (_nv5=nv5()) != null
   ? _nv5['baz']
   : null;
 ```
 
 
-#### Assignment
+#### Assignment (Not part of the proposal)
 
 The save navigation operator *could* also be used for assignment, but would only work for plain object literals
 
@@ -164,4 +165,4 @@ myVar.some = myVar.some != null ? myVar.some : {};
 myVar.some.property = 5;
 ```
 
-Because the assignment scenario makes an assumption about that shape and type of the object being modified, it may not be a good candidate for inclusion. A good example of why is that typos would create new parts of the object, rather than throwing an exception.
+Because the assignment scenario makes an assumption about that shape and type of the object being modified, it isn't a good candidate for inclusion. A good example of why is that typos would create new parts of the object, rather than throwing an exception. It is being mentioned here mainly to show it isn't viable.
