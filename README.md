@@ -195,3 +195,9 @@ or
 ```.js
 conditional ? (['foo']?['map']) : fallback
 ```
+
+### Further discussion
+
+This github repo is a summary/amalgamation of discussions that have taken place in multiple locations.  Here is a list of the primary sources:
+
+* [esdiscuss](https://esdiscuss.org/topic/existential-operator-null-propagation-operator)
