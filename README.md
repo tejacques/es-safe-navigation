@@ -196,6 +196,8 @@ or
 conditional ? (['foo']?['map']) : fallback
 ```
 
+Because of this ambiguity, the addition of the operator would likely break existing minified code, which is a nonstarter.
+
 ### Further discussion
 
 This github repo is a summary/amalgamation of discussions that have taken place in multiple locations.  Here is a list of the primary sources:
